@@ -68,6 +68,8 @@
     "sinon": "^2.0.0-pre"
   },
   "scripts": {
+    "dev": "babel-node src",
+    "dev:watch": "babel-watch src -w --inspect",
     "lint": "eslint src test tools",
     "lint:fix": "eslint src test tools --fix",
     "test": "mocha --compilers js:babel-register",
