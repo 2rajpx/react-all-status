@@ -20,8 +20,8 @@
     "react native swtich",
     "redux swtich"
   ],
-  "main": "index.js",
-  "jsnext:main": "index.es6.js",
+  "main": "dist/index.js",
+  "jsnext:main": "dist/index.es6.js",
   "babel": {
     "presets": [
       "es2015",
