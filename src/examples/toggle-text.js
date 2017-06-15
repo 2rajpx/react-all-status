@@ -5,39 +5,35 @@ import { render } from 'react-dom';
 import createState from 'react-all-status';
 
 // Use createState closure to configure state
-const { reducer: themeReducer, createHoC, createPropTypes } = createState('theme');
+const { reducer: themeReducer, createHoC } = createState('theme');
 
 // Configure store
 const store = createStore(combineReducers({ theme: themeReducer }));
 
 // Create a simple component
-const buttonStatusId = 'buttonClick';
-const Sample = ({ buttonClickValue, ButtonClickHandler }) => (
+const Sample = ({ themeTestButtonValue, themeTestButtonToggle }) => (
   <div>
-    <Button onClick={ButtonClickHandler}>
+    <Button onClick={themeTestButtonToggle}>
       Toggle
     </Button>
-    <p style={{ backgroundColor: buttonClickValue ? 'yellow' : 'orange' }}>
+    <p style={{ backgroundColor: themeTestButtonValue ? 'yellow' : 'orange' }}>
       Lorem ipsum dolor sit amet, consectetur adipisicing elit. Harum voluptatem
       modi neque quisquam earum,officia sed sequi pariatur, veniam voluptatibus!
       Sapiente nihil cupiditate perspiciatis sed rerum totam ipsum voluptatum at.
     </p>
   </div>
 );
-Sample.propTypes = {
-  ...createPropTypes(buttonStatusId),
-};
 
 /**
  * Create container
  *
- * You can use easier statement:
- * @example const SampleContainer = createHoC([buttonStatusId])(Sample);
+ * You can use an easier statement:
+ * @example const SampleContainer = createHoC(['testButton'])(Sample);
  */
-const createSampleContainer = createHoC([buttonStatusId]);
+const createSampleContainer = createHoC(['testButton']);
 const SampleContainer = createSampleContainer(Sample);
 
-// Render
+// Render your app
 const App = () => (
   <Provider store={store}>
     <SampleContainer />
