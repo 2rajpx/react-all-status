@@ -1,7 +1,7 @@
 /**
  * react-all-status
  *
- * Copyright © 2016 Tooraj Khatibi. All rights reserved.
+ * Copyright © 2017 Tooraj Khatibi. All rights reserved.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE.txt file in the root directory of this source tree.
@@ -12,9 +12,16 @@ import { connect } from 'react-redux';
 
 const createState = (stateName, initialState = {}) => {
   /**
-   * ============================================================================
+   * ===========================================================================
+   * Selectors
+   * ===========================================================================
+   */
+  const isActive = (state, flag) => !!state[stateName][flag];
+
+  /**
+   * ===========================================================================
    * Actions
-   * ============================================================================
+   * ===========================================================================
    */
   const TOGGLE = 'TOGGLE';
   const toggle = flag => ({
@@ -36,17 +43,9 @@ const createState = (stateName, initialState = {}) => {
   });
 
   /**
-   * ============================================================================
-   * Selectors
-   * ============================================================================
-   */
-  const isActive = (state = initialState, flag) => !!state[flag];
-  const isDeactive = (state = initialState, flag) => !isActive(state, flag);
-
-  /**
-   * ============================================================================
+   * ===========================================================================
    * Reducer
-   * ============================================================================
+   * ===========================================================================
    */
   const reducer = (state = initialState, action) => {
     if (stateName !== action.stateName) {
@@ -75,22 +74,41 @@ const createState = (stateName, initialState = {}) => {
   };
 
   /**
-   * ============================================================================
+   * ===========================================================================
+   * Prop Names
+   * ===========================================================================
+   */
+  const capitalize = (string) => string.charAt(0).toUpperCase() + string.slice(1);
+  const createValuePropName = (flag) => `${stateName}${capitalize(flag)}Value`;
+  const createTogglePropName = (flag) => `${stateName}${capitalize(flag)}Toggle`;
+  const createActivatePropName = (flag) => `${stateName}${capitalize(flag)}Activate`;
+  const createDeactivatePropName = (flag) => `${stateName}${capitalize(flag)}Deactivate`;
+  const createPropNames = (flag) => ({
+    value: createValuePropName(flag),
+    toggle: createTogglePropName(flag),
+    activate: createActivatePropName(flag),
+    deactivate: createDeactivatePropName(flag),
+  });
+
+  /**
+   * ===========================================================================
    * Higer-order Component (HOC)
-   * ============================================================================
+   * ===========================================================================
    */
   const createHoC = (flags) => (component) => {
     const mapStateToProps = (state) => {
       const props = {};
       flags.forEach((flag) => {
-        props[`${flag}Value`] = isActive(state[stateName], flag);
+        props[createValuePropName(flag)] = isActive(state, flag);
       });
       return props;
     };
     const mapDispatchToProps = (dispatch) => {
       const props = {};
       flags.forEach((flag) => {
-        props[`${flag}Handler`] = () => dispatch(toggle(flag));
+        props[createTogglePropName(flag)] = () => dispatch(toggle(flag));
+        props[createActivatePropName(flag)] = () => dispatch(activate(flag));
+        props[createDeactivatePropName(flag)] = () => dispatch(deactivate(flag));
       });
       return props;
     };
@@ -98,27 +116,45 @@ const createState = (stateName, initialState = {}) => {
   };
 
   /**
-   * ============================================================================
+   * ===========================================================================
    * Prop Types
-   * ============================================================================
+   * ===========================================================================
    */
-  const createPropTypes = (
-    flag,
-    isValueRequired = false,
-    isHandlerRequired = false
-  ) => {
+  const createPropTypes = (flag, requiredProps = []) => {
     const propTypes = {};
-    propTypes[`${flag}Value`] = isValueRequired ? bool.isRequired : bool;
-    propTypes[`${flag}Handler`] = isHandlerRequired ? func.isRequired : func;
+    const valueName = createValuePropName(flag);
+    const toggleName = createTogglePropName(flag);
+    const activateName = createActivatePropName(flag);
+    const deactivateName = createDeactivatePropName(flag);
+    propTypes[valueName] = requiredProps.indexOf(valueName) !== -1
+      ? bool.isRequired
+      : bool;
+    propTypes[toggleName] = requiredProps.indexOf(toggleName) !== -1
+      ? func.isRequired
+      : func;
+    propTypes[activateName] = requiredProps.indexOf(activateName) !== -1
+      ? func.isRequired
+      : func;
+    propTypes[deactivateName] = requiredProps.indexOf(deactivateName) !== -1
+      ? func.isRequired
+      : func;
     return propTypes;
   };
 
   return {
-    TOGGLE, toggle,
-    ACTIVATE, activate,
-    DEACTIVATE, deactivate,
-    isActive, isDeactive,
+    TOGGLE,
+    ACTIVATE,
+    DEACTIVATE,
+    toggle,
+    activate,
+    deactivate,
+    isActive,
     reducer,
+    createPropNames,
+    createValuePropName,
+    createTogglePropName,
+    createActivatePropName,
+    createDeactivatePropName,
     createHoC,
     createPropTypes,
   };
